@@ -62,7 +62,14 @@ type GeocodeResult struct {
 }
 
 type GeocodeResultItem struct {
-	Geometry Geometry `json:"geometry"`
+	Confidence int      `json:"confidence"`
+	Formatted  string   `json:"formatted"`
+	Geometry   Geometry `json:"geometry"`
+
+	Bounds struct {
+		NorthEast Geometry `json:"northeast"`
+		SouthWest Geometry `json:"southwest"`
+	} `json:"bounds"`
 }
 
 type Geometry struct {

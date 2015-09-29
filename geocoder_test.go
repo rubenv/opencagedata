@@ -71,4 +71,7 @@ func TestGeocode(t *testing.T) {
 	if r.Results[0].Geometry.Latitude == 0 {
 		t.Error("Expected a coordinate")
 	}
+	if r.Results[0].Confidence != 10 {
+		t.Error("Geocoder suddenly feeling very insecure")
+	}
 }
