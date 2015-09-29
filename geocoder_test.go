@@ -2,6 +2,7 @@ package opencagedata
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -63,7 +64,6 @@ func TestGeocode(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error")
 	}
-
 	if len(r.Results) == 0 {
 		t.Error("Expected results")
 	}
@@ -73,5 +73,39 @@ func TestGeocode(t *testing.T) {
 	}
 	if r.Results[0].Confidence != 10 {
 		t.Error("Geocoder suddenly feeling very insecure")
+	}
+}
+
+func TestParams(t *testing.T) {
+	key := os.Getenv("API_KEY")
+	if key == "" {
+		t.Skip("No API_KEY set, skipping online tests")
+	}
+
+	geocoder := NewGeocoder(key)
+	r, err := geocoder.Geocode("Grote Markt", &GeocodeParams{
+		CountryCode: "be",
+	})
+	if err != nil {
+		t.Error("Unexpected error")
+	}
+	if len(r.Results) == 0 {
+		t.Error("Expected results")
+	}
+	if !strings.Contains(r.Results[0].Formatted, "Belgium") {
+		t.Error("Expected a result in Belgium")
+	}
+
+	r, err = geocoder.Geocode("Grote Markt", &GeocodeParams{
+		CountryCode: "nl",
+	})
+	if err != nil {
+		t.Error("Unexpected error")
+	}
+	if len(r.Results) == 0 {
+		t.Error("Expected results")
+	}
+	if !strings.Contains(r.Results[0].Formatted, "The Netherlands") {
+		t.Error("Expected a result in The Netherlands")
 	}
 }
