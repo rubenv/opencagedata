@@ -30,10 +30,16 @@ type GeocodeResult struct {
 		Reset     int64 `json:"reset"`
 	} `json:"rate"`
 
-	Results []*GeocodeResultItem `json:"results"`
+	Results []GeocodeResultItem `json:"results"`
 }
 
 type GeocodeResultItem struct {
+	Geometry Geometry `json:"geometry"`
+}
+
+type Geometry struct {
+	Latitude  float32 `json:lat"`
+	Longitude float32 `json:lng"`
 }
 
 // Returned when geocoding fails, contains the actual response
