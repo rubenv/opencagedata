@@ -47,6 +47,4 @@ func TestErrorRequest(t *testing.T) {
 	if geo_err.Result.Status.Code != 403 {
 		t.Error("Expected bad API key")
 	}
-
-	t.Logf("%#v", geo_err.Result)
 }
