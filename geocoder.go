@@ -66,8 +66,8 @@ type GeocodeResultItem struct {
 }
 
 type Geometry struct {
-	Latitude  float32 `json:lat"`
-	Longitude float32 `json:lng"`
+	Latitude  float32 `json:"lat"`
+	Longitude float32 `json:"lng"`
 }
 
 // Returned when geocoding fails, contains the actual response

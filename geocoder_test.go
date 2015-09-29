@@ -1,25 +1,28 @@
 package opencagedata
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
-type Test struct {
-	Query       string
-	Params      *GeocodeParams
-	ExpectedURL string
+type UrlTest struct {
+	Query    string
+	Params   *GeocodeParams
+	Expected string
 }
 
-func TestGeocode(t *testing.T) {
-	tests := []Test{
-		Test{
-			Query:       "Steystraat 30",
-			ExpectedURL: "https://api.opencagedata.com/geocode/v1/json?key=test&q=Steystraat+30",
+func TestGeocodeUrl(t *testing.T) {
+	tests := []UrlTest{
+		UrlTest{
+			Query:    "Steystraat 30",
+			Expected: "https://api.opencagedata.com/geocode/v1/json?key=test&q=Steystraat+30",
 		},
-		Test{
+		UrlTest{
 			Query: "Steystraat 30",
 			Params: &GeocodeParams{
 				CountryCode: "BE",
 			},
-			ExpectedURL: "https://api.opencagedata.com/geocode/v1/json?countrycode=be&key=test&q=Steystraat+30",
+			Expected: "https://api.opencagedata.com/geocode/v1/json?countrycode=be&key=test&q=Steystraat+30",
 		},
 	}
 
@@ -27,8 +30,8 @@ func TestGeocode(t *testing.T) {
 
 	for _, test := range tests {
 		url := geocoder.geocodeUrl(test.Query, test.Params)
-		if url != test.ExpectedURL {
-			t.Errorf("Bad result for %#v (%#v), got %#v, expected %#v", test.Query, test.Params, url, test.ExpectedURL)
+		if url != test.Expected {
+			t.Errorf("Bad result for %#v (%#v), got %#v, expected %#v", test.Query, test.Params, url, test.Expected)
 		}
 	}
 }
@@ -46,5 +49,26 @@ func TestErrorRequest(t *testing.T) {
 	geo_err := err.(*GeocodeError)
 	if geo_err.Result.Status.Code != 403 {
 		t.Error("Expected bad API key")
+	}
+}
+
+func TestGeocode(t *testing.T) {
+	key := os.Getenv("API_KEY")
+	if key == "" {
+		t.Skip("No API_KEY set, skipping online tests")
+	}
+
+	geocoder := NewGeocoder(key)
+	r, err := geocoder.Geocode("Fonteinstraat 75, Leuven", nil)
+	if err != nil {
+		t.Error("Unexpected error")
+	}
+
+	if len(r.Results) == 0 {
+		t.Error("Expected results")
+	}
+
+	if r.Results[0].Geometry.Latitude == 0 {
+		t.Error("Expected a coordinate")
 	}
 }
