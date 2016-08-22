@@ -34,15 +34,27 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
+	"time"
 )
 
 const endpoint = "https://api.opencagedata.com/geocode/v1/"
 
 type Geocoder struct {
+	// API Key, found on the developer dashboard: https://developer.opencagedata.com/
 	Key string
+
+	// Disable rate limiting (not recommended).
+	//
+	// This library will sleep automatically to avoid hitting the rate limit.
+	DisableRateLimitSleep bool
+
+	lock  sync.Mutex
+	sleep time.Time
 }
 
 type GeocodeParams struct {
+	// Country hint
 	CountryCode string
 }
 
@@ -96,6 +108,14 @@ func NewGeocoder(key string) *Geocoder {
 //
 // The params parameter is optional, feel free to pass nil when no specific options are needed.
 func (g *Geocoder) Geocode(query string, params *GeocodeParams) (*GeocodeResult, error) {
+	g.lock.Lock()
+	defer g.lock.Unlock()
+
+	sleep := g.sleep.Sub(time.Now())
+	if sleep > 0 {
+		time.Sleep(sleep)
+	}
+
 	u := g.geocodeUrl(query, params)
 	resp, err := http.Get(u)
 	if err != nil {
@@ -111,6 +131,14 @@ func (g *Geocoder) Geocode(query string, params *GeocodeParams) (*GeocodeResult,
 	if result.Status.Code != 200 {
 		return nil, &GeocodeError{Result: &result}
 	}
+
+	if !g.DisableRateLimitSleep {
+		reset := time.Unix(result.Rate.Reset, 0)
+		untilReset := reset.Sub(time.Now())
+		delay := time.Duration(float64(untilReset+1) / (float64(result.Rate.Remaining) + 1))
+		g.sleep = time.Now().Add(delay)
+	}
+
 	return &result, nil
 }
 
