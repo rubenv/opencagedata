@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/rubenv/opencagedata.svg?branch=master)](https://travis-ci.org/rubenv/opencagedata) [![GoDoc](https://godoc.org/github.com/rubenv/opencagedata?status.png)](https://godoc.org/github.com/rubenv/opencagedata)
 
-http://geocoder.opencagedata.com/
+https://opencagedata.com/
 
 ## Installation
 ```
