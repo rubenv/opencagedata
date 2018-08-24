@@ -4,6 +4,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/cheekybits/is"
 )
 
 type UrlTest struct {
@@ -38,22 +40,21 @@ func TestGeocodeUrl(t *testing.T) {
 }
 
 func TestErrorRequest(t *testing.T) {
+	is := is.New(t)
+
 	geocoder := NewGeocoder("test")
 	r, err := geocoder.Geocode("Leuven", nil)
-	if err == nil {
-		t.Error("Expected error")
-	}
-	if r != nil {
-		t.Error("Expected no result")
-	}
+	is.Err(err)
+	is.Nil(r)
 
-	geo_err := err.(*GeocodeError)
-	if geo_err.Result.Status.Code != 403 {
-		t.Error("Expected bad API key")
-	}
+	geo_err, ok := err.(*GeocodeError)
+	is.True(ok)
+	is.Equal(geo_err.Result.Status.Code, 403)
 }
 
 func TestGeocode(t *testing.T) {
+	is := is.New(t)
+
 	key := os.Getenv("API_KEY")
 	if key == "" {
 		t.Skip("No API_KEY set, skipping online tests")
@@ -61,25 +62,17 @@ func TestGeocode(t *testing.T) {
 
 	geocoder := NewGeocoder(key)
 	r, err := geocoder.Geocode("Fonteinstraat 75, Leuven", nil)
-	if err != nil {
-		t.Error("Unexpected error")
-	}
-	if r == nil {
-		t.Error("Expected a result")
-	}
-	if len(r.Results) == 0 {
-		t.Error("Expected results")
-	}
+	is.NoErr(err)
+	is.NotNil(r)
+	is.NotEqual(len(r.Results), 0)
 
-	if r.Results[0].Geometry.Latitude == 0 {
-		t.Error("Expected a coordinate")
-	}
-	if r.Results[0].Confidence != 10 {
-		t.Error("Geocoder suddenly feeling very insecure")
-	}
+	is.NotEqual(r.Results[0].Geometry.Latitude, 0)
+	is.Equal(r.Results[0].Confidence, 10)
 }
 
 func TestParams(t *testing.T) {
+	is := is.New(t)
+
 	key := os.Getenv("API_KEY")
 	if key == "" {
 		t.Skip("No API_KEY set, skipping online tests")
@@ -89,29 +82,16 @@ func TestParams(t *testing.T) {
 	r, err := geocoder.Geocode("Grote Markt", &GeocodeParams{
 		CountryCode: "be",
 	})
-	if err != nil {
-		t.Error("Unexpected error")
-	}
-	if r == nil {
-		t.Error("Expected a result")
-	}
-	if len(r.Results) == 0 {
-		t.Error("Expected results")
-	}
-	if !strings.Contains(r.Results[0].Formatted, "Belgium") {
-		t.Error("Expected a result in Belgium")
-	}
+	is.NoErr(err)
+	is.NotNil(r)
+	is.NotEqual(len(r.Results), 0)
+	is.True(strings.Contains(r.Results[0].Formatted, "Belgium"))
 
 	r, err = geocoder.Geocode("Grote Markt", &GeocodeParams{
 		CountryCode: "nl",
 	})
-	if err != nil {
-		t.Error("Unexpected error")
-	}
-	if len(r.Results) == 0 {
-		t.Error("Expected results")
-	}
-	if !strings.Contains(r.Results[0].Formatted, "The Netherlands") {
-		t.Error("Expected a result in The Netherlands")
-	}
+	is.NoErr(err)
+	is.NotNil(r)
+	is.NotEqual(len(r.Results), 0)
+	is.True(strings.Contains(r.Results[0].Formatted, "The Netherlands"))
 }
