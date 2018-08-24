@@ -96,7 +96,7 @@ type GeocodeError struct {
 }
 
 func (err *GeocodeError) Error() string {
-	return fmt.Sprintf("%s: %s", err.Result.Status.Code, err.Result.Status.Message)
+	return fmt.Sprintf("%d: %s", err.Result.Status.Code, err.Result.Status.Message)
 }
 
 func NewGeocoder(key string) *Geocoder {
