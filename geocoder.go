@@ -124,13 +124,13 @@ func (g *Geocoder) Geocode(query string, params *GeocodeParams) (*GeocodeResult,
 	}
 	defer resp.Body.Close()
 
-	var result GeocodeResult
-	err = json.NewDecoder(resp.Body).Decode(&result)
+	result := &GeocodeResult{}
+	err = json.NewDecoder(resp.Body).Decode(result)
 	if err != nil {
 		return nil, err
 	}
 	if result.Status.Code != 200 {
-		return nil, &GeocodeError{Result: &result}
+		return nil, &GeocodeError{Result: result}
 	}
 
 	if !g.DisableRateLimitSleep && result.Rate.Limit > 0 {
@@ -140,7 +140,7 @@ func (g *Geocoder) Geocode(query string, params *GeocodeParams) (*GeocodeResult,
 		g.sleep = time.Now().Add(delay)
 	}
 
-	return &result, nil
+	return result, nil
 }
 
 // Split out for testing purposes

@@ -64,6 +64,9 @@ func TestGeocode(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error")
 	}
+	if r == nil {
+		t.Error("Expected a result")
+	}
 	if len(r.Results) == 0 {
 		t.Error("Expected results")
 	}
