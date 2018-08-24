@@ -46,7 +46,8 @@ type Geocoder struct {
 
 	// Disable rate limiting (not recommended).
 	//
-	// This library will sleep automatically to avoid hitting the rate limit.
+	// This library will sleep automatically to avoid hitting the rate limit
+	// when using the free plan.
 	DisableRateLimitSleep bool
 
 	lock  sync.Mutex
@@ -132,7 +133,7 @@ func (g *Geocoder) Geocode(query string, params *GeocodeParams) (*GeocodeResult,
 		return nil, &GeocodeError{Result: &result}
 	}
 
-	if !g.DisableRateLimitSleep {
+	if !g.DisableRateLimitSleep && result.Rate.Limit > 0 {
 		reset := time.Unix(result.Rate.Reset, 0)
 		untilReset := reset.Sub(time.Now())
 		delay := time.Duration(float64(untilReset+1) / (float64(result.Rate.Remaining) + 1))
