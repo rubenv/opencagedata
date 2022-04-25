@@ -57,6 +57,7 @@ type Geocoder struct {
 type GeocodeParams struct {
 	// Country hint
 	CountryCode string
+	Language    string
 }
 
 type GeocodeResult struct {
@@ -154,6 +155,9 @@ func (g *Geocoder) geocodeUrl(query string, params *GeocodeParams) string {
 	if params != nil {
 		if params.CountryCode != "" {
 			q.Set("countrycode", strings.ToLower(params.CountryCode))
+		}
+		if params.Language != "" {
+			q.Set("language", params.Language)
 		}
 	}
 
